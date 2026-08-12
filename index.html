@@ -41,7 +41,7 @@
     .sentence{
       min-height:150px; display:flex; align-items:center; justify-content:center;
       padding:18px 8px; text-align:center; font-family:Georgia,"Times New Roman",serif;
-      font-size:clamp(24px,5vw,39px); line-height:1.42; letter-spacing:.005em;
+      font-size:clamp(22px,4.6vw,38px); line-height:1.42; letter-spacing:.005em;
     }
     .sentence.speaking{background:linear-gradient(180deg,#fff,#f7f8ff);border-radius:16px}
     .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -128,6 +128,12 @@
         <span class="value" id="rateValue">0.90×</span>
       </div>
       <input id="rate" type="range" min="0.5" max="1.5" step="0.05" value="0.9">
+      <div class="speed-presets" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">
+        <button class="btn speed-btn" type="button" data-rate="0.75">0.75×</button>
+        <button class="btn speed-btn" type="button" data-rate="1.00">1.00×</button>
+        <button class="btn speed-btn" type="button" data-rate="1.25">1.25×</button>
+      </div>
+      <div class="note" style="margin-top:8px">速度を変えた後、「お手本を聞く」を押すと新しい速度で再生します。</div>
     </div>
 
     <div class="setting">
@@ -273,9 +279,18 @@ function speak(){
   u.lang = selected?.lang || "en-US";
   u.rate = parseFloat(rate.value);
   u.pitch = 1;
-  u.onstart = () => sentenceEl.classList.add("speaking");
-  u.onend = () => sentenceEl.classList.remove("speaking");
-  u.onerror = () => sentenceEl.classList.remove("speaking");
+  u.onstart = () => {
+    sentenceEl.classList.add("speaking");
+    statusEl.textContent = `お手本を ${parseFloat(rate.value).toFixed(2)}× で再生中です。`;
+  };
+  u.onend = () => {
+    sentenceEl.classList.remove("speaking");
+    if(!(mediaRecorder && mediaRecorder.state === "recording")) renderRecording();
+  };
+  u.onerror = () => {
+    sentenceEl.classList.remove("speaking");
+    if(!(mediaRecorder && mediaRecorder.state === "recording")) renderRecording();
+  };
   window.speechSynthesis.speak(u);
 }
 
@@ -335,9 +350,28 @@ function stopRecording(){
   }
 }
 
-rate.addEventListener("input", () => {
+function updateRateDisplay(){
   rateValue.textContent = `${parseFloat(rate.value).toFixed(2)}×`;
+  document.querySelectorAll(".speed-btn").forEach(btn => {
+    const active = Math.abs(parseFloat(btn.dataset.rate) - parseFloat(rate.value)) < 0.001;
+    btn.style.background = active ? "var(--accent)" : "#edf0f5";
+    btn.style.color = active ? "#fff" : "#263043";
+  });
+}
+
+rate.addEventListener("input", updateRateDisplay);
+rate.addEventListener("change", updateRateDisplay);
+
+document.querySelectorAll(".speed-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    speechSynthesis.cancel();
+    sentenceEl.classList.remove("speaking");
+    rate.value = btn.dataset.rate;
+    updateRateDisplay();
+  });
 });
+
+updateRateDisplay();
 
 speakBtn.addEventListener("click", speak);
 stopSpeakBtn.addEventListener("click", () => {
