@@ -44,6 +44,14 @@
       font-size:clamp(22px,4.6vw,38px); line-height:1.42; letter-spacing:.005em;
     }
     .sentence.speaking{background:linear-gradient(180deg,#fff,#f7f8ff);border-radius:16px}
+    .translation{
+      margin-top:-6px;
+      padding:0 10px 18px;
+      text-align:center;
+      font-size:clamp(15px,3.5vw,20px);
+      line-height:1.65;
+      color:#5f6b7a;
+    }
     .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .btn{
       border:0;border-radius:14px;padding:14px 14px;font-weight:750;cursor:pointer;
@@ -109,6 +117,7 @@
     <div class="progress"><div id="progressBar"></div></div>
 
     <div class="sentence" id="sentence" lang="en-US"></div>
+    <div class="translation" id="translation" lang="ja"></div>
 
     <div class="controls">
       <button class="btn primary" id="speakBtn" type="button">▶ お手本を聞く</button>
@@ -178,6 +187,18 @@ const sentences = [
   "Of course, I sometimes don’t understand what other people say due to their local accent.",
   "In that case, I can just ask them to say it again.",
   "We don’t have a big problem with communication."
+ ];
+
+const translations = [
+  "エミ、明確な目標をもって英語を学んでいるのはすばらしいことだね。",
+  "でも、なぜすべての英語学習者がアメリカ人やイギリス人のように話す必要があるのか、その理由はまだ分からないんだ。",
+  "東南アジアの4か国、ブルネイ、フィリピン、シンガポール、マレーシアでは、英語が公用語だったり、広く話されていたりします。",
+  "それぞれの国で、人々は自分たちなりの英語を話しています。",
+  "私の国タイでは、英語は広く話されてはいませんが、私たちはタイ風の英語を話すことができます。",
+  "すべての人が、自分たちなりの英語でコミュニケーションをとることができます。",
+  "もちろん、私は時々、相手の地域特有のアクセントのために、何を言っているのか分からないことがあります。",
+  "そのような場合は、もう一度言ってもらうよう頼めばいいのです。",
+  "コミュニケーションで大きな問題はありません。"
 ];
 
 let index = 0;
@@ -187,6 +208,7 @@ let currentStream = null;
 const recordings = new Map();
 
 const sentenceEl = document.getElementById("sentence");
+const translationEl = document.getElementById("translation");
 const counterEl = document.getElementById("counter");
 const progressBar = document.getElementById("progressBar");
 const rate = document.getElementById("rate");
@@ -242,6 +264,7 @@ function renderRecording(){
 
 function render(){
   sentenceEl.textContent = sentences[index];
+  translationEl.textContent = translations[index];
   counterEl.textContent = `Sentence ${index+1} / ${sentences.length}`;
   progressBar.style.width = `${((index+1)/sentences.length)*100}%`;
   prevBtn.disabled = index === 0;
