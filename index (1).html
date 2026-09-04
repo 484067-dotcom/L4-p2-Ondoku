@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f7fb" />
+  <title>Part 2 Reading Practice</title>
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#ffffff; --text:#1f2937; --muted:#667085;
+      --line:#e5e7eb; --accent:#3157d5; --accent2:#2447bd;
+      --danger:#c43b3b; --ok:#177245; --soft:#eef2ff;
+      --shadow:0 10px 30px rgba(31,41,55,.08); --radius:20px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+      background:var(--bg); color:var(--text);
+    }
+    button,input,select{font:inherit}
+    button{touch-action:manipulation}
+    .wrap{max-width:900px;margin:0 auto;padding:20px 16px 48px}
+    header{margin:4px 0 18px}
+    h1{font-size:clamp(24px,4.5vw,38px);margin:0 0 6px;letter-spacing:-.02em}
+    .sub{color:var(--muted);font-size:14px}
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:18px; margin-bottom:16px;
+    }
+    .intro{
+      font-size:15px; line-height:1.7; color:#3b4557; background:#f9fafb;
+      border-radius:14px; padding:12px 14px;
+    }
+    .toprow{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;
+    }
+    .counter{font-weight:700}
+    .progress{height:8px;border-radius:999px;background:#e9ecf3;overflow:hidden;margin-top:10px}
+    .progress > div{height:100%;background:var(--accent);width:0;transition:width .25s ease}
+    .sentence{
+      min-height:150px; display:flex; align-items:center; justify-content:center;
+      padding:18px 8px; text-align:center; font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(22px,4.6vw,38px); line-height:1.42; letter-spacing:.005em;
+    }
+    .sentence.speaking{background:linear-gradient(180deg,#fff,#f7f8ff);border-radius:16px}
+    .translation{
+      margin-top:-6px;
+      padding:0 10px 18px;
+      text-align:center;
+      font-size:clamp(15px,3.5vw,20px);
+      line-height:1.65;
+      color:#5f6b7a;
+    }
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .btn{
+      border:0;border-radius:14px;padding:14px 14px;font-weight:750;cursor:pointer;
+      background:#edf0f5;color:#263043;transition:transform .05s ease,background .15s ease;
+    }
+    .btn:active{transform:scale(.985)}
+    .btn.primary{background:var(--accent);color:#fff}
+    .btn.primary:hover{background:var(--accent2)}
+    .btn.record{background:#fff0f0;color:#a82626;border:1px solid #ffd1d1}
+    .btn.stop{background:#fee2e2;color:#9b1c1c}
+    .btn.ok{background:#eaf8f0;color:#11603a}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .setting{margin-top:16px}
+    .labelrow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+    label{font-weight:700;font-size:14px}
+    .value{font-weight:800;color:var(--accent)}
+    input[type="range"]{width:100%;accent-color:var(--accent)}
+    select{
+      width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;
+      padding:11px 12px;color:var(--text)
+    }
+    .recording-area{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+    audio{width:100%;margin-top:10px}
+    .status{min-height:24px;margin-top:10px;font-size:14px;color:var(--muted)}
+    .status.live{color:var(--danger);font-weight:700}
+    .tips{font-size:14px;line-height:1.75;color:#475467}
+    .tips strong{color:#263043}
+    .sentence-list{display:grid;gap:8px}
+    .sentence-item{
+      width:100%;text-align:left;border:1px solid var(--line);background:#fff;
+      border-radius:12px;padding:11px 12px;color:#344054;cursor:pointer;line-height:1.5
+    }
+    .sentence-item.active{
+      border-color:#a7b6f3;background:var(--soft);color:#203eaa;font-weight:700
+    }
+    .num{display:inline-block;min-width:2.2em;color:#7a8496;font-weight:700}
+    .note{font-size:12px;color:#7b8494;margin-top:10px;line-height:1.6}
+    @media (min-width:720px){
+      .controls{grid-template-columns:repeat(4,1fr)}
+      .card{padding:22px}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Part 2 Reading Practice</h1>
+    <div class="sub">1文ずつ、聞く・読む・録音する練習</div>
+  </header>
+
+  <section class="card">
+    <div class="intro"><strong>Part 2</strong><br>
+      Kiet talks to Emi about communicating in English.
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="toprow">
+      <div class="counter" id="counter">Sentence 1 / 9</div>
+      <button class="btn" id="resetBtn" type="button">最初に戻る</button>
+    </div>
+    <div class="progress"><div id="progressBar"></div></div>
+
+    <div class="sentence" id="sentence" lang="en-US"></div>
+    <div class="translation" id="translation" lang="ja"></div>
+
+    <div class="controls">
+      <button class="btn primary" id="speakBtn" type="button">▶ お手本を聞く</button>
+      <button class="btn" id="stopSpeakBtn" type="button">■ 読み上げ停止</button>
+      <button class="btn record" id="recordBtn" type="button">● 録音開始</button>
+      <button class="btn stop" id="stopRecordBtn" type="button" disabled>■ 録音停止</button>
+    </div>
+
+    <div class="nav">
+      <button class="btn" id="prevBtn" type="button">← 前の文</button>
+      <button class="btn" id="nextBtn" type="button">次の文 →</button>
+    </div>
+
+    <div class="setting">
+      <div class="labelrow">
+        <label for="rate">読み上げスピード</label>
+        <span class="value" id="rateValue">0.90×</span>
+      </div>
+      <input id="rate" type="range" min="0.5" max="1.5" step="0.05" value="0.9">
+      <div class="speed-presets" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">
+        <button class="btn speed-btn" type="button" data-rate="0.75">0.75×</button>
+        <button class="btn speed-btn" type="button" data-rate="1.00">1.00×</button>
+        <button class="btn speed-btn" type="button" data-rate="1.25">1.25×</button>
+      </div>
+      <div class="note" style="margin-top:8px">速度を変えた後、「お手本を聞く」を押すと新しい速度で再生します。</div>
+    </div>
+
+    <div class="setting">
+      <label for="voiceSelect">英語音声</label>
+      <select id="voiceSelect" aria-label="English voice"></select>
+    </div>
+
+    <div class="recording-area">
+      <strong>自分の録音</strong>
+      <div class="status" id="status">「録音開始」を押して英文を読んでください。</div>
+      <audio id="audioPlayback" controls hidden></audio>
+      <button class="btn ok" id="deleteRecordingBtn" type="button" hidden style="margin-top:8px;width:100%">
+        録音を消す
+      </button>
+    </div>
+  </section>
+
+  <section class="card">
+    <strong>全文から文を選ぶ</strong>
+    <div class="sentence-list" id="sentenceList" style="margin-top:12px"></div>
+  </section>
+
+  <section class="card tips">
+    <strong>おすすめの使い方</strong><br>
+    ① 0.75〜0.90×でお手本を聞く → ② まねして読む → ③ 録音する →
+    ④ 自分の声を聞く → ⑤ 慣れたら1.00〜1.20×に上げる。
+    <div class="note">
+      ※ 録音にはマイクの許可が必要です。GitHub PagesなどのHTTPS環境で開くと安定して使えます。
+      外部API・APIキーは使用していません。
+    </div>
+  </section>
+</div>
+
+<script>
+const sentences = [
+  "Emi, it’s great that you are learning English with a clear goal.",
+  "However, I still don’t know the reason why all English learners need to speak like American or British people.",
+  "In the four Southeast Asian countries of Brunei, the Philippines, Singapore, and Malaysia, English is an official language or is widely spoken.",
+  "In each country, people speak their own version of English.",
+  "In my country, Thailand, English is not widely spoken, but we can speak a Thai version.",
+  "All people can communicate in their own version of English.",
+  "Of course, I sometimes don’t understand what other people say due to their local accent.",
+  "In that case, I can just ask them to say it again.",
+  "We don’t have a big problem with communication."
+ ];
+
+const translations = [
+  "エミ、明確な目標をもって英語を学んでいるのはすばらしいことだね。",
+  "でも、なぜすべての英語学習者がアメリカ人やイギリス人のように話す必要があるのか、その理由はまだ分からないんだ。",
+  "東南アジアの4か国、ブルネイ、フィリピン、シンガポール、マレーシアでは、英語が公用語だったり、広く話されていたりします。",
+  "それぞれの国で、人々は自分たちなりの英語を話しています。",
+  "私の国タイでは、英語は広く話されてはいませんが、私たちはタイ風の英語を話すことができます。",
+  "すべての人が、自分たちなりの英語でコミュニケーションをとることができます。",
+  "もちろん、私は時々、相手の地域特有のアクセントのために、何を言っているのか分からないことがあります。",
+  "そのような場合は、もう一度言ってもらうよう頼めばいいのです。",
+  "コミュニケーションで大きな問題はありません。"
+];
+
+let index = 0;
+let mediaRecorder = null;
+let chunks = [];
+let currentStream = null;
+const recordings = new Map();
+
+const sentenceEl = document.getElementById("sentence");
+const translationEl = document.getElementById("translation");
+const counterEl = document.getElementById("counter");
+const progressBar = document.getElementById("progressBar");
+const rate = document.getElementById("rate");
+const rateValue = document.getElementById("rateValue");
+const voiceSelect = document.getElementById("voiceSelect");
+const speakBtn = document.getElementById("speakBtn");
+const stopSpeakBtn = document.getElementById("stopSpeakBtn");
+const recordBtn = document.getElementById("recordBtn");
+const stopRecordBtn = document.getElementById("stopRecordBtn");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const resetBtn = document.getElementById("resetBtn");
+const statusEl = document.getElementById("status");
+const audioPlayback = document.getElementById("audioPlayback");
+const deleteRecordingBtn = document.getElementById("deleteRecordingBtn");
+const sentenceList = document.getElementById("sentenceList");
+
+function renderSentenceList(){
+  sentenceList.innerHTML = "";
+  sentences.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "sentence-item" + (i === index ? " active" : "");
+    b.innerHTML = `<span class="num">${i+1}.</span>${s}`;
+    b.addEventListener("click", () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") return;
+      window.speechSynthesis.cancel();
+      index = i;
+      render();
+      window.scrollTo({top:0, behavior:"smooth"});
+    });
+    sentenceList.appendChild(b);
+  });
+}
+
+function renderRecording(){
+  const rec = recordings.get(index);
+  if(rec){
+    audioPlayback.src = rec.url;
+    audioPlayback.hidden = false;
+    deleteRecordingBtn.hidden = false;
+    statusEl.textContent = "録音済みです。再生してお手本と聞き比べてください。";
+  } else {
+    audioPlayback.pause();
+    audioPlayback.removeAttribute("src");
+    audioPlayback.load();
+    audioPlayback.hidden = true;
+    deleteRecordingBtn.hidden = true;
+    statusEl.textContent = "「録音開始」を押して英文を読んでください。";
+  }
+  statusEl.classList.remove("live");
+}
+
+function render(){
+  sentenceEl.textContent = sentences[index];
+  translationEl.textContent = translations[index];
+  counterEl.textContent = `Sentence ${index+1} / ${sentences.length}`;
+  progressBar.style.width = `${((index+1)/sentences.length)*100}%`;
+  prevBtn.disabled = index === 0;
+  nextBtn.disabled = index === sentences.length - 1;
+  renderRecording();
+  renderSentenceList();
+}
+
+function loadVoices(){
+  const voices = speechSynthesis.getVoices();
+  const english = voices.filter(v => /^en(-|_)/i.test(v.lang));
+  voiceSelect.innerHTML = "";
+  const list = english.length ? english : voices;
+  list.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v.name;
+    opt.textContent = `${v.name} (${v.lang})`;
+    if (/en-US/i.test(v.lang) && /Samantha|Google US English|Microsoft.*Aria|Ava/i.test(v.name)) {
+      opt.selected = true;
+    }
+    voiceSelect.appendChild(opt);
+  });
+}
+
+function speak(){
+  if(!("speechSynthesis" in window)){
+    alert("このブラウザは音声読み上げに対応していません。");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(sentences[index]);
+  const voices = speechSynthesis.getVoices();
+  const selected = voices.find(v => v.name === voiceSelect.value);
+  if(selected) u.voice = selected;
+  u.lang = selected?.lang || "en-US";
+  u.rate = parseFloat(rate.value);
+  u.pitch = 1;
+  u.onstart = () => {
+    sentenceEl.classList.add("speaking");
+    statusEl.textContent = `お手本を ${parseFloat(rate.value).toFixed(2)}× で再生中です。`;
+  };
+  u.onend = () => {
+    sentenceEl.classList.remove("speaking");
+    if(!(mediaRecorder && mediaRecorder.state === "recording")) renderRecording();
+  };
+  u.onerror = () => {
+    sentenceEl.classList.remove("speaking");
+    if(!(mediaRecorder && mediaRecorder.state === "recording")) renderRecording();
+  };
+  window.speechSynthesis.speak(u);
+}
+
+async function startRecording(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
+    statusEl.textContent = "このブラウザでは録音機能を利用できません。Chrome / Edge / Safari の最新版をお試しください。";
+    return;
+  }
+  try{
+    window.speechSynthesis.cancel();
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    currentStream = stream;
+    chunks = [];
+
+    let options = {};
+    const preferredTypes = ["audio/webm;codecs=opus","audio/webm","audio/mp4"];
+    const supported = preferredTypes.find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+    if(supported) options.mimeType = supported;
+
+    mediaRecorder = new MediaRecorder(stream, options);
+
+    mediaRecorder.ondataavailable = e => {
+      if(e.data && e.data.size > 0) chunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const type = mediaRecorder.mimeType || chunks[0]?.type || "audio/webm";
+      const blob = new Blob(chunks, {type});
+      const old = recordings.get(index);
+      if(old) URL.revokeObjectURL(old.url);
+      const url = URL.createObjectURL(blob);
+      recordings.set(index, {blob, url});
+
+      if(currentStream){
+        currentStream.getTracks().forEach(t => t.stop());
+        currentStream = null;
+      }
+      recordBtn.disabled = false;
+      stopRecordBtn.disabled = true;
+      renderRecording();
+    };
+
+    mediaRecorder.start();
+    recordBtn.disabled = true;
+    stopRecordBtn.disabled = false;
+    statusEl.textContent = "● 録音中… 英文を読んでください。";
+    statusEl.classList.add("live");
+  } catch(err){
+    statusEl.classList.remove("live");
+    statusEl.textContent = "マイクを使用できませんでした。ブラウザのマイク許可を確認してください。";
+  }
+}
+
+function stopRecording(){
+  if(mediaRecorder && mediaRecorder.state === "recording"){
+    mediaRecorder.stop();
+  }
+}
+
+function updateRateDisplay(){
+  rateValue.textContent = `${parseFloat(rate.value).toFixed(2)}×`;
+  document.querySelectorAll(".speed-btn").forEach(btn => {
+    const active = Math.abs(parseFloat(btn.dataset.rate) - parseFloat(rate.value)) < 0.001;
+    btn.style.background = active ? "var(--accent)" : "#edf0f5";
+    btn.style.color = active ? "#fff" : "#263043";
+  });
+}
+
+rate.addEventListener("input", updateRateDisplay);
+rate.addEventListener("change", updateRateDisplay);
+
+document.querySelectorAll(".speed-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    speechSynthesis.cancel();
+    sentenceEl.classList.remove("speaking");
+    rate.value = btn.dataset.rate;
+    updateRateDisplay();
+  });
+});
+
+updateRateDisplay();
+
+speakBtn.addEventListener("click", speak);
+stopSpeakBtn.addEventListener("click", () => {
+  speechSynthesis.cancel();
+  sentenceEl.classList.remove("speaking");
+});
+recordBtn.addEventListener("click", startRecording);
+stopRecordBtn.addEventListener("click", stopRecording);
+
+prevBtn.addEventListener("click", () => {
+  if(index > 0){
+    speechSynthesis.cancel();
+    index--;
+    render();
+  }
+});
+
+nextBtn.addEventListener("click", () => {
+  if(index < sentences.length - 1){
+    speechSynthesis.cancel();
+    index++;
+    render();
+  }
+});
+
+resetBtn.addEventListener("click", () => {
+  speechSynthesis.cancel();
+  index = 0;
+  render();
+});
+
+deleteRecordingBtn.addEventListener("click", () => {
+  const old = recordings.get(index);
+  if(old) URL.revokeObjectURL(old.url);
+  recordings.delete(index);
+  renderRecording();
+});
+
+loadVoices();
+if("speechSynthesis" in window){
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+render();
+</script>
+</body>
+</html>
